@@ -28,7 +28,7 @@ def sidebar():
 		
 	st.session_state["symbol"] = st.sidebar.text_input(
 		"Ticker Symbol",
-		value = "MANU"
+		value = "LON:RKT"
 	)
 
 	if "online" not in st.session_state:
