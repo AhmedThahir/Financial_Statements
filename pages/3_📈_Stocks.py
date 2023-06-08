@@ -99,4 +99,9 @@ def stocks(tickers, symbol, strings: dict, online):
 		config = config
 	)
 
+	st.dataframe(
+		df,
+		use_container_width=True,
+	)
+
 stocks(st.session_state["tickers"], st.session_state["symbol"], st.session_state["strings"], st.session_state["online"])

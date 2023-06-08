@@ -154,64 +154,69 @@ def read_data(_ticker, symbol, online, *args):
 	return balance_sheet_df, cash_flow_df, income_statement_df
 
 def get_statements_data(_ticker, symbol, online, *args):
-	balance_sheet_df, cash_flow_df, income_statement_df = read_data(_ticker, symbol, online, *args)
-	
-	balance_sheet_df = balance_sheet_df.drop(columns=["symbol", "periodType", "currencyCode"])
-	balance_sheet_df = balance_sheet_df.rename(columns={
-		"StockholdersEquity": "TotalEquity"
-	})
-	balance_sheet_df["TotalCurrentLiabilities"] = balance_sheet_df["CurrentLiabilities"] + balance_sheet_df["OtherCurrentLiabilities"]
-	balance_sheet_df["CurrentEquity"] = balance_sheet_df["CurrentLiabilities"] + balance_sheet_df["OtherCurrentLiabilities"]
-	
-	balance_sheet_df = pd.melt(
-		balance_sheet_df,
-		id_vars="Date",
-		# value_vars=None,
-		var_name="Variable",
-		value_name="Value",
-		# col_level=None,
-		# ignore_index=False
-	)
-	balance_sheet_df["Statement"] = "Balance Sheet"
+	try:
+		balance_sheet_df, cash_flow_df, income_statement_df = read_data(_ticker, symbol, online, *args)
+		
+		balance_sheet_df = balance_sheet_df.drop(columns=["symbol", "periodType", "currencyCode"])
+		balance_sheet_df = balance_sheet_df.rename(columns={
+			"StockholdersEquity": "TotalEquity"
+		})
+		balance_sheet_df["TotalCurrentLiabilities"] = balance_sheet_df["CurrentLiabilities"] + balance_sheet_df["OtherCurrentLiabilities"]
+		balance_sheet_df["CurrentEquity"] = balance_sheet_df["CurrentLiabilities"] + balance_sheet_df["OtherCurrentLiabilities"]
+		
+		balance_sheet_df = pd.melt(
+			balance_sheet_df,
+			id_vars="Date",
+			# value_vars=None,
+			var_name="Variable",
+			value_name="Value",
+			# col_level=None,
+			# ignore_index=False
+		)
+		balance_sheet_df["Statement"] = "Balance Sheet"
 
-	cash_flow_df = cash_flow_df.drop(columns=[
-		"NetIncome", "symbol", "periodType", "currencyCode"
-	])
-	cash_flow_df = cash_flow_df.rename(columns={
-		"ChangesInCash": "NetCashflow",
-	})
-	cash_flow_df = pd.melt(
-		cash_flow_df,
-		id_vars="Date",
-		# value_vars=None,
-		var_name="Variable",
-		value_name="Value",
-		# col_level=None,
-		# ignore_index=False
-	)
-	cash_flow_df["Statement"] = "Cash Flow"
-	
-	income_statement_df = income_statement_df.drop(columns=["symbol", "periodType", "currencyCode"])
-	income_statement_df = income_statement_df.rename(columns={
-		"PretaxIncome": "EBT",
-		"TaxRateForCalcs": "EffectiveTaxRate"
-	})
+		cash_flow_df = cash_flow_df.drop(columns=[
+			"NetIncome", "symbol", "periodType", "currencyCode"
+		])
+		cash_flow_df = cash_flow_df.rename(columns={
+			"ChangesInCash": "NetCashflow",
+		})
+		cash_flow_df = pd.melt(
+			cash_flow_df,
+			id_vars="Date",
+			# value_vars=None,
+			var_name="Variable",
+			value_name="Value",
+			# col_level=None,
+			# ignore_index=False
+		)
+		cash_flow_df["Statement"] = "Cash Flow"
+		
+		income_statement_df = income_statement_df.drop(columns=["symbol", "periodType", "currencyCode"])
+		income_statement_df = income_statement_df.rename(columns={
+			"PretaxIncome": "EBT",
+			"TaxRateForCalcs": "EffectiveTaxRate"
+		})
 
-	income_statement_df = pd.melt(
-		income_statement_df,
-		id_vars="Date",
-		# value_vars=None,
-		var_name="Variable",
-		value_name="Value",
-		# col_level=None,
-		# ignore_index=False
-	)
-	income_statement_df["Statement"] = "Income Statement"
-	
-	df = pd.concat([balance_sheet_df, cash_flow_df, income_statement_df]).reset_index(drop=True)
+		income_statement_df = pd.melt(
+			income_statement_df,
+			id_vars="Date",
+			# value_vars=None,
+			var_name="Variable",
+			value_name="Value",
+			# col_level=None,
+			# ignore_index=False
+		)
+		income_statement_df["Statement"] = "Income Statement"
+		
+		df = pd.concat([balance_sheet_df, cash_flow_df, income_statement_df]).reset_index(drop=True)
 
-	mappings = df[["Variable", "Statement"]].drop_duplicates()
-	
+		mappings = df[["Variable", "Statement"]].drop_duplicates()
+	except:
+		st.warning("""
+		Some variables are missing. Kindly check the data souce to rectify the issue.
+		""")
+		st.stop()
 	return df, mappings
 
 @st.cache_data
