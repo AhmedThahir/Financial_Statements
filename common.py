@@ -24,18 +24,20 @@ config = dict(
 
 def sidebar():
 	if "symbol" not in st.session_state:
-		st.session_state["symbol"] = "MANU"
+		st.session_state["symbol"] = "TITAN.NS"
 		
 	st.session_state["symbol"] = st.sidebar.text_input(
 		"Ticker Symbol",
-		value = "MANU"
+		value = "TITAN.NS"
 	)
 
 	if "online" not in st.session_state:
 		st.session_state["online"] = False
+	if "frequency" not in st.session_state:
+		st.session_state["frequency"] = "Annual"
 
-	st.session_state["online"] = st.sidebar.checkbox("Latest?")
-
+	st.session_state["online"] = True # st.sidebar.checkbox("Latest?", False)
+	
 	st.session_state["asynchronous"] = True
 	asynchronous_str = "" if not st.session_state["asynchronous"] else ", asynchronous=True"
 
