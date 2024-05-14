@@ -547,6 +547,26 @@ def main(tickers, symbol, strings: dict, online: bool):
     
     dfs_to_download = read_data(tickers, symbol, online, trailing=False, frequency=frequency)
     sheet_names = ["Balance Sheet", "Cash Flow", "Income Statement"]
+    dfs_to_download = list(dfs_to_download)
+    # dfs_to_download.append(table_data)
+    with st.sidebar:
+        st.divider()
+        if st.button('Download all data'):
+            st.download_button(
+                label="Save Data",
+                data = convert_dfs_to_excel(
+                    dfs_to_download,
+                    sheet_names
+                ),
+                file_name=f"{symbol}.xlsx"
+            )
+    
+            # if fig:
+            #     st.download_button(
+            #         label='Save Graph',
+            #         data=convert_fig_for_download(fig, config),
+            #         file_name=f'{symbol}.html',
+            #     )
 
     c1, c2, c3 = st.columns([1, 1, 1])
 
@@ -829,9 +849,6 @@ def main(tickers, symbol, strings: dict, online: bool):
             use_container_width=True
         )
 
-    dfs_to_download = list(dfs_to_download)
-    dfs_to_download.append(table_data)
-
     sheet_names.append("Filtered_Data")
 
     if len(st.session_state["selected_attributes_modified"]) > 0:
@@ -846,23 +863,5 @@ def main(tickers, symbol, strings: dict, online: bool):
                 use_container_width=True
             )
 
-    with st.sidebar:
-        st.divider()
-        if st.button('Prepare Downloads'):
-            st.download_button(
-                label="Save Data",
-                data = convert_dfs_to_excel(
-                    dfs_to_download,
-                    sheet_names
-                ),
-                file_name=f"{symbol}.xlsx"
-            )
-    
-            if fig:
-                st.download_button(
-                    label='Save Graph',
-                    data=convert_fig_for_download(fig, config),
-                    file_name=f'{symbol}.html',
-                )
 
 main(st.session_state["tickers"], st.session_state["symbol"], st.session_state["strings"], st.session_state["online"])
