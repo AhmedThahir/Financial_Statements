@@ -24,11 +24,11 @@ config = dict(
 
 def sidebar():
 	if "symbol" not in st.session_state:
-		st.session_state["symbol"] = "TITAN.NS"
+		st.session_state["symbol"] = "MANU"
 		
 	st.session_state["symbol"] = st.sidebar.text_input(
 		"Ticker Symbol",
-		value = "TITAN.NS"
+		value = "MANU"
 	)
 
 	if "online" not in st.session_state:

@@ -423,40 +423,49 @@ def vertical_analysis(df, statement_mappings):
                     args=[subset[base]]
                 )
             )
-        except KeyError: # Some variables not available: 'TotalAssets
+        except KeyError as e: # Some variables not available: 'TotalAssets
+            st.warning(str(e))
             subset["Value"] = None
             
         subset = subset.reset_index()
-
+        
         if subset.shape[0] == 0:
             continue
+        
         subset = pd.melt(
             subset,
             id_vars="Date",
             var_name="Variable",
             value_name="Value"
         )
-
+        
+        
         subset = (
             subset
             .dropna(how="any")
             .drop_duplicates(subset=["Date", "Variable"], keep="last")
         )
-
+        
         subset = subset.reset_index(drop=True)
 
         subset = subset.merge(
             statement_mappings,
             how="inner"
         )
-
         subset["Value"] = subset["Value"].apply(convert_to_percentage)
-
         subset.index = initial_index
-        vertical_df[mask][["Date", "Variable", "Value", "Statement"]] = subset[["Date", "Variable", "Value", "Statement"]]
+        
+        vertical_df.loc[mask, "Value"] = vertical_df.loc[mask, "Value"].astype(str)
+        vertical_df.loc[mask, ["Date", "Variable", "Value", "Statement"]] = subset[["Date", "Variable", "Value", "Statement"]]
+        # st.dataframe(vertical_df[mask], use_container_width = True)
+        # st.stop()
 
     vertical_df["Variable"] += "Ver"
     vertical_df["Analysis"] = "Vertical"
+    
+    # vertical_df *= 0
+    # st.dataframe(vertical_df, use_container_width = True)
+    # st.stop()
 
     return vertical_df
 
@@ -613,17 +622,24 @@ def main(tickers, symbol, strings: dict, online: bool):
             ratio_attributes.append(ratios[attr])
     
     df = df[
-        df["Analysis"].isin(st.session_state["selected_analyses"])
-    ]
-    
-    df = df[
         df["Statement"].isin(
             st.session_state["selected_statements"]+[None, np.nan]
         )
     ]
     
-    regular_variables = df["Variable"].unique()
-
+    regular_variables = (
+        df
+        [
+            df["Analysis"] == "Absolute"
+        ]
+        ["Variable"]
+        .unique()
+    )
+    
+    df = df[
+        df["Analysis"].isin(st.session_state["selected_analyses"])
+    ]
+    
     attributes_options = []			
     if len(st.session_state["selected_analyses"]) == 0:
         pass
